@@ -31,14 +31,12 @@ jobs:
       run: .\sl analyze --strict --app shiftleft-csharp-demo --tag branch=${{ github.head_ref || steps.extract_branch.outputs.branch }} --csharp --dotnet --cpg netcoreWebapi/netcoreWebapi.csproj
       env:
         SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}
-        SHIFTLEFT_API_HOST: www-ext.stg.shiftleft.io
-        SHIFTLEFT_GRPC_TELEMETRY_HOST: SL_EXTERNAL_GRPC_TELEMETRY_HOST_TOKEN
-        SHIFTLEFT_GRPC_API_HOST: api-ext.stg.shiftleft.io:443
+        
 
     - name: Create status check
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        URL: https://app.stg.shiftleft.io/findingsSummary/shiftleft-csharp-demo?apps=shiftleft-csharp-demo&isApp=1
+        URL: https://app.shiftleft.io/findingsSummary/shiftleft-csharp-demo?apps=shiftleft-csharp-demo&isApp=1
       run: |
         $params = @{
             Uri         = "https://api.github.com/repos/$ENV:GITHUB_REPOSITORY/check-runs"
@@ -63,14 +61,12 @@ jobs:
         Expand-Archive -Path sl.zip -DestinationPath .
     - name: Validate Build Rules
       run: |
-        .\sl check-analysis --app shiftleft-csharp-demo
-        --github-pr-number=${{github.event.number}}
-        --github-pr-user=${{ github.repository_owner }}
-        --github-pr-repo=${{ github.event.repository.name }}
-        --github-token=${{ secrets.GITHUB_TOKEN }}
+        .\sl check-analysis --app shiftleft-csharp-demo `
+            --github-pr-number=${{github.event.number}} `
+            --github-pr-user=${{ github.repository_owner }} `
+            --github-pr-repo=${{ github.event.repository.name }} `
+            --github-token=${{ secrets.GITHUB_TOKEN }}
       env:
         SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}
-        SHIFTLEFT_API_HOST: www-ext.stg.shiftleft.io
-        SHIFTLEFT_GRPC_TELEMETRY_HOST: SL_EXTERNAL_GRPC_TELEMETRY_HOST_TOKEN
-        SHIFTLEFT_GRPC_API_HOST: api-ext.stg.shiftleft.io:443
+        
 
