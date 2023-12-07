@@ -50,7 +50,8 @@ jobs:
         }
         Invoke-RestMethod @params
 
-  Build-Rules: 
+  Build-Rules:
+    permissions: write-all
     runs-on: windows-latest
     needs: NextGen-Static-Analysis
     steps:
