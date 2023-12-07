@@ -23,36 +23,13 @@ jobs:
 
     - name: Build web api
       run: dotnet build netcoreWebapi
-    - name: Extract branch name
-      shell: bash
-      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-      id: extract_branch
     - name: Analyze with NextGen Static Analysis
-      run: .\sl analyze --strict --app shiftleft-csharp-demo --tag branch=${{ github.head_ref || steps.extract_branch.outputs.branch }} --csharp --dotnet --cpg netcoreWebapi/netcoreWebapi.csproj
+      run: .\sl analyze --app shiftleft-csharp-demo --tag branch=${{ github.head_ref || github.ref_name }} --csharp --dotnet --cpg --wait netcoreWebapi/netcoreWebapi.csproj
       env:
         SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}
-        SHIFTLEFT_API_HOST: www.shiftleft.io
-        SHIFTLEFT_GRPC_TELEMETRY_HOST: telemetry.shiftleft.io:443
-        SHIFTLEFT_GRPC_API_HOST: api.shiftleft.io:443
 
-    - name: Create status check
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        URL: https://app.shiftleft.io/findingsSummary/shiftleft-csharp-demo?apps=shiftleft-csharp-demo&isApp=1
-      run: |
-        $params = @{
-            Uri         = "https://api.github.com/repos/$ENV:GITHUB_REPOSITORY/check-runs"
-            Headers     = @{
-              'Authorization' = "Bearer $ENV:GITHUB_TOKEN"
-              'Accept' = 'application/vnd.github.antiope-preview+json'
-            }
-            Method      = 'POST'
-            Body        = "{`"name`": `"ShiftLeft NextGen Static Analysis`", `"head_sha`": `"$ENV:GITHUB_REF`", `"external_id`": `"shiftleft-csharp-demo`", `"details_url`": `"$ENV:URL`", `"status`": `"completed`", `"conclusion`": `"action_required`", `"output`": {`"title`": `"ShiftLeft NextGen Static Analysis Findings`", `"summary`": `"Visit $ENV:URL for the findings`"}}"
-            ContentType = 'application/json'
-        }
-        Invoke-RestMethod @params
-
-  Build-Rules: 
+  Build-Rules:
+    permissions: write-all
     runs-on: windows-latest
     needs: NextGen-Static-Analysis
     steps:
@@ -70,7 +47,3 @@ jobs:
             --github-token=${{ secrets.GITHUB_TOKEN }}
       env:
         SHIFTLEFT_ACCESS_TOKEN: ${{ secrets.SHIFTLEFT_ACCESS_TOKEN }}
-        SHIFTLEFT_API_HOST: www.shiftleft.io
-        SHIFTLEFT_GRPC_TELEMETRY_HOST: telemetry.shiftleft.io:443
-        SHIFTLEFT_GRPC_API_HOST: api.shiftleft.io:443
-
